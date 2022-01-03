@@ -10,9 +10,16 @@ const appCfg = {
 
 };
 
-const imgs = ["particle.png"];
-
 const app = new PIXI.Application({ ...appCfg });
+
+//Задний фон
+
+const background = new PIXI.Graphics();
+background.beginFill(PIXI.utils.string2hex("#008000"));
+background.drawRect(0, 0, appCfg.width, appCfg.height);
+background.endFill();
+app.stage.addChild(background);
+
 const particleModule = new ParticleModule(app);
 
 //Инициализация объектов, которые будут создавать эффект взрыва
@@ -23,7 +30,3 @@ document.body.appendChild(app.view);
 const game = new Game(particleModule, app);
 
 const loader = PIXI.Loader.shared;
-
-for (let i = 0; i < imgs.length; ++i) {
-    loader.add('img' + i, urls[i]);
-}

@@ -5,6 +5,7 @@ export default class Game {
         const width = App.renderer.width;
         const height = App.renderer.height;
         this.particleModule = particleModule;
+
         //Земля
         const earth = new PIXI.Graphics();
         earth.beginFill(PIXI.utils.string2hex("#1c941b"));
@@ -13,18 +14,22 @@ export default class Game {
         App.stage.addChild(earth);
 
         //Солнце
-        var sun = new PIXI.Graphics();
+        const sun = new PIXI.Graphics();
         sun.beginFill(0xFFFF00);
         sun.drawEllipse(width - 75, 75, 50, 50);
         sun.endFill();
         App.stage.addChild(sun);
 
-
-        const container = new PIXI.Container();
+        //Зенитка
+        const antiAirGun = new PIXI.Graphics();
+        antiAirGun.beginFill(PIXI.utils.string2hex("#FF69B4"));
+        antiAirGun.drawRect(width - 200, 520, 100, 100);
+        antiAirGun.endFill();
+        App.stage.addChild(antiAirGun);
 
         let healths = [];
         //Здоровье
-        const health = 1;
+        const health = 3;
         for (let i = 1; i <= health; i++) {
             var heart = new PIXI.Graphics();
             heart.beginFill(PIXI.utils.string2hex("#ff0000"));
@@ -36,10 +41,31 @@ export default class Game {
 
         let planes = [];
 
+        let bullets = [];
 
         App.stage.interactive = true;
 
         App.stage.on('mouseup', (e) => {
+
+            var hit = PIXI.Sprite.from('bullet.png');
+            hit.width = 50;
+            hit.height = 50;
+            hit.anchor.set(0.5);
+            //hit.beginFill(PIXI.utils.string2hex("#ff0000"));
+            //hit.drawEllipse(width - 200, 520, 10, 10);
+            //hit.endFill();
+
+            hit.x = width - 200;
+            hit.y = 520;
+
+            bullets.push({
+                obj: hit,
+                startPoint: { x: width - 200, y: 520 },
+                endPoint: { x: e.data.global.x, y: e.data.global.y },
+                speed: 1
+            });
+
+            App.stage.addChild(hit);
             if (planes.some(planeObj => planeObj.plane === e.target)) {
                 App.stage.removeChild(e.target);
                 planes.pop();
@@ -47,7 +73,7 @@ export default class Game {
             }
         });
 
-        App.ticker.add((delta => {
+        App.ticker.add((delta) => {
             if (planes.length === 0) {
                 //Создание самолёта
                 const plane = new PIXI.Graphics();
@@ -60,7 +86,7 @@ export default class Game {
                 planes.push({ plane, speed });
                 App.stage.addChild(plane);
             }
-
+            //Передвижение самолётов
             planes.forEach(p => {
                 p.plane.x += p.speed * delta;
                 if (p.plane.x >= width) {
@@ -88,6 +114,43 @@ export default class Game {
                     }
                 }
             });
-        }));
+
+            const boxesIntersect = (a, b) => {
+                var ab = a.getBounds();
+                var bb = b.getBounds();
+                return ab.x + ab.width > bb.x && ab.x < bb.x + bb.width && ab.y + ab.height > bb.y && ab.y < bb.y + bb.height;
+            };
+
+            //Перемещение пуль
+            bullets.forEach(bullet => {
+
+                let speed = 0.1;
+
+                let obj = bullet.obj;
+
+                let subX = bullet.startPoint.x - bullet.endPoint.x; // 10
+                let subY = bullet.startPoint.y - bullet.endPoint.y; // 10
+
+                let angle = Math.atan2(subY, subX);
+                obj.rotation = angle - Math.PI / 2;
+
+                let offsetX = subX * speed; // 0.1
+                let offsetY = subY * speed; // 0.1
+                obj.x = obj.x - offsetX;
+                obj.y = obj.y - offsetY;
+
+                for (let i = 0; i < planes.length;) {
+                    let plane = planes[i];
+                    if (boxesIntersect(plane.plane, obj)) {
+                        particleModule.emitCords("explode", obj.x, obj.y);
+                        App.stage.removeChild(plane.plane);
+                        planes.pop();
+                        App.stage.removeChild(obj);
+                        continue;
+                    }
+                    i++
+                }
+            });
+        });
     }
 }
