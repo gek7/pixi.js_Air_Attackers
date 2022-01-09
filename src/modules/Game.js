@@ -4,6 +4,8 @@ export default class Game {
     constructor(particleModule, App = new PIXI.Application()) {
         const width = App.renderer.width;
         const height = App.renderer.height;
+
+        this.speed = 20;
         this.particleModule = particleModule;
 
         //Земля
@@ -61,16 +63,10 @@ export default class Game {
             bullets.push({
                 obj: hit,
                 startPoint: { x: width - 200, y: 520 },
-                endPoint: { x: e.data.global.x, y: e.data.global.y },
-                speed: 1
+                endPoint: { x: e.data.global.x, y: e.data.global.y }
             });
 
             App.stage.addChild(hit);
-            if (planes.some(planeObj => planeObj.plane === e.target)) {
-                App.stage.removeChild(e.target);
-                planes.pop();
-                particleModule.emitCords("explode", e.data.global.x, e.data.global.y);
-            }
         });
 
         App.ticker.add((delta) => {
@@ -122,35 +118,32 @@ export default class Game {
             };
 
             //Перемещение пуль
-            bullets.forEach(bullet => {
-
-                let speed = 0.1;
-
+            for (let bulletIndex = 0; bulletIndex < bullets.length;) {
+                let bullet = bullets[bulletIndex];
                 let obj = bullet.obj;
-
                 let subX = bullet.startPoint.x - bullet.endPoint.x; // 10
                 let subY = bullet.startPoint.y - bullet.endPoint.y; // 10
-
                 let angle = Math.atan2(subY, subX);
-                obj.rotation = angle - Math.PI / 2;
 
-                let offsetX = subX * speed; // 0.1
-                let offsetY = subY * speed; // 0.1
-                obj.x = obj.x - offsetX;
-                obj.y = obj.y - offsetY;
+                //Вычитаем Math.PI чтобы спрайт пули правильно отображался в полёте
+                obj.rotation = angle - (Math.PI / 2);
+                obj.x = obj.x - (this.speed * Math.cos(angle));
+                obj.y = obj.y - (this.speed * Math.sin(angle));
 
-                for (let i = 0; i < planes.length;) {
-                    let plane = planes[i];
+                for (let planeIndex = 0; planeIndex < planes.length;) {
+                    let plane = planes[planeIndex];
                     if (boxesIntersect(plane.plane, obj)) {
                         particleModule.emitCords("explode", obj.x, obj.y);
                         App.stage.removeChild(plane.plane);
                         planes.pop();
                         App.stage.removeChild(obj);
-                        continue;
+                        bullets.splice(bulletIndex, 1);
+                        break;
                     }
-                    i++
+                    planeIndex++;
                 }
-            });
+                bulletIndex++;
+            }
         });
     }
 }

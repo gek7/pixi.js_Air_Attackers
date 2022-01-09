@@ -85,6 +85,14 @@ object-assign
  */
 
 /*!
+ * @pixi/particle-emitter - v5.0.2
+ * Compiled Sun, 29 Aug 2021 19:43:13 UTC
+ *
+ * @pixi/particle-emitter is licensed under the MIT License.
+ * http://www.opensource.org/licenses/mit-license
+ */
+
+/*!
  * @pixi/polyfill - v6.2.0
  * Compiled Mon, 01 Nov 2021 16:52:10 UTC
  *
