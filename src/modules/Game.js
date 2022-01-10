@@ -1,18 +1,24 @@
 import * as PIXI from 'pixi.js';
-
 export default class Game {
     constructor(particleModule, App = new PIXI.Application()) {
         const width = App.renderer.width;
         const height = App.renderer.height;
 
+        this.resources = PIXI.Loader.shared.resources;
+
         this.speed = 20;
         this.particleModule = particleModule;
 
+        //Задний фон
+        const background = PIXI.Sprite.from('images/background.png');
+        background.width = width;
+        background.height = height;
+        App.stage.addChild(background);
+        App.stage.setChildIndex(background, 0);
         //Земля
-        const earth = new PIXI.Graphics();
-        earth.beginFill(PIXI.utils.string2hex("#1c941b"));
-        earth.drawRect(0, 620, width, 620);
-        earth.endFill();
+        const earth = new PIXI.Sprite.from(this.resources.ground.texture);
+        earth.y = height - 70;
+        earth.width = width;
         App.stage.addChild(earth);
 
         //Солнце
@@ -23,20 +29,31 @@ export default class Game {
         App.stage.addChild(sun);
 
         //Зенитка
-        const antiAirGun = new PIXI.Graphics();
-        antiAirGun.beginFill(PIXI.utils.string2hex("#FF69B4"));
-        antiAirGun.drawRect(width - 200, 520, 100, 100);
-        antiAirGun.endFill();
+        const antiAirGun = new PIXI.Sprite(this.resources.tank.texture);
+        antiAirGun.x = width - this.resources.tank.texture.width + 80;
+        antiAirGun.y = height - this.resources.tank.texture.height - 67;
+        antiAirGun.scale.x = -1;
         App.stage.addChild(antiAirGun);
+
+        //Пушка
+        const gunMovePart = new PIXI.Sprite(this.resources.tank_turret.texture);
+        gunMovePart.x = antiAirGun.x - this.resources.tank_turret.texture.width - 15;
+        gunMovePart.y = antiAirGun.y - this.resources.tank_turret.texture.height + 53;
+        gunMovePart.scale.x = -1;
+        App.stage.addChild(gunMovePart);
+
+        App.stage.setChildIndex(gunMovePart, 2);
+
+        gunMovePart.anchor.set(0, 0.5);
 
         let healths = [];
         //Здоровье
         const health = 3;
-        for (let i = 1; i <= health; i++) {
-            var heart = new PIXI.Graphics();
-            heart.beginFill(PIXI.utils.string2hex("#ff0000"));
-            heart.drawEllipse(20 + 60 * i, 40, 20, 20);
-            heart.endFill();
+        for (let i = 0; i < health; i++) {
+            var heart = new PIXI.Sprite(this.resources.heart.texture);
+            heart.scale.set(0.5);
+            heart.y = 40;
+            heart.x = 40 + 100 * i;
             App.stage.addChild(heart);
             healths.push(heart);
         }
@@ -49,36 +66,55 @@ export default class Game {
 
         App.stage.on('mouseup', (e) => {
 
-            var hit = PIXI.Sprite.from('bullet.png');
-            hit.width = 50;
-            hit.height = 50;
-            hit.anchor.set(0.5);
-            //hit.beginFill(PIXI.utils.string2hex("#ff0000"));
-            //hit.drawEllipse(width - 200, 520, 10, 10);
-            //hit.endFill();
+            let angle = this.calculateAngle(
+                gunMovePart.x, gunMovePart.y,
+                e.data.global.x, e.data.global.y
+            );
 
-            hit.x = width - 200;
-            hit.y = 520;
+            if (angle < this.celsiusToRadian(0)) {
+                angle = 0;
+            } else if (angle >= this.celsiusToRadian(100)) {
+                angle = this.celsiusToRadian(100);
+            }
+
+            var bullet = PIXI.Sprite.from(this.resources.bullet.texture);
+            bullet.scale.set(0.11);
+            bullet.anchor.set(0, 0.5);
+
+            bullet.x = gunMovePart.x;
+            bullet.y = gunMovePart.y;
 
             bullets.push({
-                obj: hit,
-                startPoint: { x: width - 200, y: 520 },
-                endPoint: { x: e.data.global.x, y: e.data.global.y }
+                obj: bullet,
+                angle: angle
             });
 
-            App.stage.addChild(hit);
+            App.stage.addChild(bullet);
+            App.stage.setChildIndex(bullet, 1);
+        });
+
+        App.stage.on('mousemove', (e) => {
+
+            let angle = this.calculateAngle(gunMovePart.x, gunMovePart.y, e.data.global.x, e.data.global.y);
+
+            if (angle < this.celsiusToRadian(0)) {
+                angle = this.celsiusToRadian(0);
+            } else if (angle > this.celsiusToRadian(100)) {
+                angle = this.celsiusToRadian(100);
+            }
+            gunMovePart.anchor.set(0, 0.5);
+            //Вычитаем Math.PI чтобы спрайт пули правильно отображался в полёте
+            gunMovePart.rotation = angle;
+
         });
 
         App.ticker.add((delta) => {
             if (planes.length === 0) {
                 //Создание самолёта
-                const plane = new PIXI.Graphics();
-                plane.interactive = true;
-                plane.beginFill(PIXI.utils.string2hex("#42aaff"));
-                const randomHeight = Math.random() * (height / 2);
+                const plane = new PIXI.Sprite(this.resources.plane.texture);
+                const y = Math.random() * (height / 2);
                 const speed = Math.random() * 6 + 3;
-                plane.drawRect(-100, randomHeight + 50, 100, 50);
-                plane.endFill();
+                plane.y = y;
                 planes.push({ plane, speed });
                 App.stage.addChild(plane);
             }
@@ -89,6 +125,7 @@ export default class Game {
                     planes = [];
                     App.stage.removeChild(p.plane);
                     const h = healths.pop();
+                    particleModule.emitCords("lifeLost", h.x, h.y);
                     App.stage.removeChild(h);
                     if (!healths.length) {
                         const style = new PIXI.TextStyle({
@@ -121,14 +158,10 @@ export default class Game {
             for (let bulletIndex = 0; bulletIndex < bullets.length;) {
                 let bullet = bullets[bulletIndex];
                 let obj = bullet.obj;
-                let subX = bullet.startPoint.x - bullet.endPoint.x; // 10
-                let subY = bullet.startPoint.y - bullet.endPoint.y; // 10
-                let angle = Math.atan2(subY, subX);
 
-                //Вычитаем Math.PI чтобы спрайт пули правильно отображался в полёте
-                obj.rotation = angle - (Math.PI / 2);
-                obj.x = obj.x - (this.speed * Math.cos(angle));
-                obj.y = obj.y - (this.speed * Math.sin(angle));
+                obj.rotation = bullet.angle;
+                obj.x = obj.x - (this.speed * Math.cos(bullet.angle));
+                obj.y = obj.y - (this.speed * Math.sin(bullet.angle));
 
                 for (let planeIndex = 0; planeIndex < planes.length;) {
                     let plane = planes[planeIndex];
@@ -145,5 +178,17 @@ export default class Game {
                 bulletIndex++;
             }
         });
+    }
+
+    celsiusToRadian(celsius) {
+        return celsius * Math.PI / 180;
+    }
+    radianToCelsius(radian) {
+        return 180 / Math.PI * radian;
+    }
+    calculateAngle(x1, y1, x2, y2) {
+        let subX = x1 - x2;
+        let subY = y1 - y2;
+        return Math.atan2(subY, subX);
     }
 }
