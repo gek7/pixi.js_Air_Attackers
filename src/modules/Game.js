@@ -2,6 +2,10 @@ import * as PIXI from 'pixi.js';
 import * as Utils from './Utils.js';
 export default class Game {
     constructor(particleModule, app) {
+
+        const backgroundMusic = new Audio("sounds/backgroundMusic.mp3");
+        backgroundMusic.volume = 0.2;
+        backgroundMusic.play();
         this.app = app;
         this.width = this.app.renderer.width;
         this.height = this.app.renderer.height;
@@ -141,6 +145,13 @@ export default class Game {
             obj.x = obj.x - (this.speed * Math.cos(bullet.angle)) * delta;
             obj.y = obj.y - (this.speed * Math.sin(bullet.angle)) * delta;
 
+            //Если пуля выходит за границы игры, то убираем её из игры
+            if (obj.x > this.app.width || obj.y > this.app.height) {
+                this.app.stage.removeChild(obj);
+                this.bullets.splice(bulletIndex, 1);
+                continue;
+            }
+
             for (let planeIndex = 0; planeIndex < this.planes.length;) {
                 let plane = this.planes[planeIndex];
                 if (Utils.boxesIntersect(plane.plane, obj)) {
@@ -149,6 +160,10 @@ export default class Game {
                     this.planes.pop();
                     this.app.stage.removeChild(obj);
                     this.bullets.splice(bulletIndex, 1);
+                    bullet.sound.pause();
+                    const explode = new Audio("sounds/planeExplode.wav");
+                    explode.volume = 0.1;
+                    explode.play();
                     break;
                 }
                 planeIndex++;
@@ -182,13 +197,16 @@ export default class Game {
 
         bullet.x = this.gunMovePart.x;
         bullet.y = this.gunMovePart.y;
-
+        const shotSound = new Audio("./sounds/tankShot.wav");
+        shotSound.volume = 0.1;
         this.bullets.push({
             obj: bullet,
-            angle: this.gunMovePart.rotation
+            angle: this.gunMovePart.rotation,
+            sound: shotSound
         });
 
         this.app.stage.addChild(bullet);
         this.app.stage.setChildIndex(bullet, 1);
+        shotSound.play();
     }
 }
