@@ -2,10 +2,6 @@ import * as PIXI from 'pixi.js';
 import * as Utils from './Utils.js';
 export default class Game {
     constructor(particleModule, app) {
-
-        const backgroundMusic = new Audio("sounds/backgroundMusic.mp3");
-        backgroundMusic.volume = 0.2;
-        backgroundMusic.play();
         this.app = app;
         this.width = this.app.renderer.width;
         this.height = this.app.renderer.height;
@@ -15,6 +11,9 @@ export default class Game {
         this.MaxHealth = 3;
         //Здесь будут объекты здоровья
         this.healths = [];
+
+        this.resources.backgroundMusic.sound.volume = 0.04;
+        this.resources.backgroundMusic.sound.play();
 
         //Задний фон
         const background = PIXI.Sprite.from('images/background.png');
@@ -160,10 +159,8 @@ export default class Game {
                     this.planes.pop();
                     this.app.stage.removeChild(obj);
                     this.bullets.splice(bulletIndex, 1);
-                    bullet.sound.pause();
-                    const explode = new Audio("sounds/planeExplode.wav");
-                    explode.volume = 0.1;
-                    explode.play();
+                    this.resources.planeExplode.sound.volume = 0.03;
+                    this.resources.planeExplode.sound.play();
                     break;
                 }
                 planeIndex++;
@@ -197,16 +194,14 @@ export default class Game {
 
         bullet.x = this.gunMovePart.x;
         bullet.y = this.gunMovePart.y;
-        const shotSound = new Audio("./sounds/tankShot.wav");
-        shotSound.volume = 0.1;
+        this.resources.tankShot.sound.volume = 0.01;
+        this.resources.tankShot.sound.play();
         this.bullets.push({
             obj: bullet,
-            angle: this.gunMovePart.rotation,
-            sound: shotSound
+            angle: this.gunMovePart.rotation
         });
 
         this.app.stage.addChild(bullet);
         this.app.stage.setChildIndex(bullet, 1);
-        shotSound.play();
     }
 }

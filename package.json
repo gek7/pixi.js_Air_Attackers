@@ -16,6 +16,7 @@
   },
   "dependencies": {
     "@pixi/particle-emitter": "^5.0.2",
+    "@pixi/sound": "^4.2.0",
     "pixi.js": "^6.2.0"
   }
 }
