@@ -1,7 +1,7 @@
 import * as PIXI from "pixi.js";
 import Game from "./modules/Game";
-import { fireConfig, lifeLost } from "./modules/ParticleConfigs";
-import ParticleModule from "./modules/ParticleModule";
+import { fireConfig, lifeLost } from "./modules/Particles/ParticleConfigs";
+import ParticleModule from "./modules/Particles/ParticleModule";
 import { sound } from "@pixi/sound";
 
 const appCfg = {
@@ -38,6 +38,7 @@ loader.load(() => {
 
     //Инициализация объектов, которые будут создавать эффект взрыва
     particleModule.createEmitterByConfig("explode", fireConfig);
+    //Инициализация объектов, которые будут создавать эффект потери жизни
     particleModule.createEmitterByConfig("lifeLost", lifeLost);
 
     console.log("loaded");
