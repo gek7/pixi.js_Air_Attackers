@@ -17,11 +17,7 @@ export default class Game {
         this.resources = PIXI.Loader.shared.resources;
         this.particleModule = particleModule;
         this.app.stage.interactive = true;
-        //Скорость снаряда
-        this.speed = 20;
         this.MaxHealth = 3;
-
-        this.bullets = [];
         this.healths = [];
 
         this.resources.backgroundMusic.sound.volume = 0.04;
