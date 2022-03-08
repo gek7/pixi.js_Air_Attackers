@@ -8,10 +8,9 @@ export default class BulletsController {
     }
 
     /**
-    * Создаёт новый самолёт
+    * Создаёт новый экземпляр снаряда
     */
     createBullet(initialX, initialY, angle) {
-        console.dir("ada");
         let bullet = new PIXI.Sprite(this.game.resources.bullet.texture);
         bullet.scale.set(0.11);
         bullet.anchor.set(0, 0.5);

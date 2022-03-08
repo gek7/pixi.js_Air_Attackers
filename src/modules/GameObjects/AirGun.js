@@ -38,7 +38,6 @@ export default class AirGun extends PIXI.Container {
     rotateGun(x, y) {
         let barrelX = this.x + this.gunMovePart.x;
         let barrelY = this.y + this.gunMovePart.y;
-        console.dir("hi");
         let angle = Utils.calculateAngle(barrelX, barrelY, x, y);
 
         if (angle < Utils.celsiusToRadian(0)) {

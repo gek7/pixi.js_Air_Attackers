@@ -30,9 +30,9 @@ export default class EnemiesController {
             if (p.plane.x >= this.game.width) {
                 this.planes = [];
                 this.game.app.stage.removeChild(p.plane);
-                const h = this.game.healths.pop();
-                this.game.particleModule.emitCords("lifeLost", h.x, h.y);
-                this.game.app.stage.removeChild(h);
+                const healthObj = this.game.healths.pop();
+                this.game.particleModule.emitCords("lifeLost", healthObj.x, healthObj.y);
+                this.game.app.stage.removeChild(healthObj);
                 if (!this.game.healths.length) {
                     const style = new PIXI.TextStyle({
                         dropShadowAngle: 0.6,
@@ -45,16 +45,17 @@ export default class EnemiesController {
                         fontSize: 75
                     });
                     const text = new PIXI.Text('YOU LOSE', style);
+                    this.game.isLosed = true;
                     text.anchor.set(0.5);
                     text.x = this.game.width / 2;
                     text.y = this.game.height / 2;
-                    const title = this.game.app.stage.addChild(text);
-                    this.game.app.ticker.stop();
+                    this.game.app.stage.addChild(text);
+                    this.game.app.stage.setChildIndex(text, 2);
                 }
             }
         });
 
-        if (this.planes.length == 0) {
+        if (this.planes.length == 0 && this.game.healths.length > 0) {
             this.createPlane();
         }
     }
