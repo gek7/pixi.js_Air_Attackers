@@ -9,8 +9,14 @@ import MenuStage from './Stages/MenuStage.js';
 export default class Game {
     constructor(app) {
         this.app = app;
-        this.width = this.app.renderer.width;
-        this.height = this.app.renderer.height;
+
+        this.defaultRendererWidth = 1280;
+        this.defaultRendererHeight = 720;
+
+        this.width = this.defaultRendererWidth;
+        this.height = this.defaultRendererHeight;
+
+        window.onresize = (() => this.resize()).bind(this);
         this.STAGES = {
             "PLAY": PlayStage,
             "MENU": MenuStage
@@ -40,5 +46,21 @@ export default class Game {
         } else {
             throw "Невозможно переключить состояние";
         }
+        this.resize();
+    }
+
+
+    resize() {
+        const renderWidth = window.innerWidth;
+        const renderHeight = window.innerHeight;
+        const widthRatio = renderWidth / this.defaultRendererWidth;
+        const heightRatio = renderHeight / this.defaultRendererHeight;
+
+        //Берём минимальную сторону пользовательской игровой зоны, чтобы уместить туда игру
+        const newScale = widthRatio > heightRatio ? heightRatio : widthRatio;
+
+        this.app.stage.scale.set(newScale);
+
+        this.app.renderer.resize(this.defaultRendererWidth * newScale, this.defaultRendererHeight * newScale);
     }
 }

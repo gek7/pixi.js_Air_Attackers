@@ -25,6 +25,9 @@ loader.add("heart", "images/heart.png");
 loader.add("plane", "images/plane.png");
 loader.add("menuBackground", "images/menuBackground.png");
 loader.add("BTN_START", "images/BTN_START.png");
+loader.add("BTN_START_MOUSE_UP", "images/BTN_START_MOUSE_UP.png");
+loader.add("BTN_PAUSE", "images/BTN_PAUSE.png");
+loader.add("BTN_PAUSE_MOUSE_UP", "images/BTN_PAUSE_MOUSE_UP.png");
 //Звуки
 loader.add('planeExplode', 'sounds/planeExplode.wav');
 loader.add('tankShot', 'sounds/tankShot.wav');

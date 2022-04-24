@@ -15,12 +15,5 @@ export default class Background extends PIXI.Container {
         earth.y = game.height - 70;
         earth.width = game.width;
         this.addChild(earth);
-
-        //Солнце
-        const sun = new PIXI.Graphics();
-        sun.beginFill(0xFFFF00);
-        sun.drawEllipse(game.width - 75, 75, 50, 50);
-        sun.endFill();
-        this.addChild(sun);
     }
 }

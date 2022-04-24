@@ -8,4 +8,5 @@ export default class Stage {
         this.game.app.stage.destroy();
         this.game.app.stage = new Container();
     }
+    paint() { }
 }

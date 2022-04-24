@@ -36,8 +36,10 @@ export default class AirGun extends PIXI.Container {
     * Метод направляет орудие танка в переданные координаты
     */
     rotateGun(x, y) {
-        let barrelX = this.x + this.gunMovePart.x;
-        let barrelY = this.y + this.gunMovePart.y;
+        //Координаты орудия (Необходимо, чтобы высчитать угол полёта снаряда)
+        const barrelX = this.x + this.gunMovePart.x;
+        const barrelY = this.y + this.gunMovePart.y;
+
         let angle = Utils.calculateAngle(barrelX, barrelY, x, y);
 
         if (angle < Utils.celsiusToRadian(0)) {

@@ -19,8 +19,15 @@ export default class MenuStage extends Stage {
     }
 
     attachEvents() {
+        console.log("attach");
         this.startButton.on('mouseup', (e) => {
             this.game.changeStage(this.game.STAGES.PLAY);
+        });
+        this.startButton.on('mouseover', (e) => {
+            this.startButton.texture = this.resources.BTN_START_MOUSE_UP.texture;
+        });
+        this.startButton.on('mouseout', (e) => {
+            this.startButton.texture = this.resources.BTN_START.texture;
         });
     }
 }
