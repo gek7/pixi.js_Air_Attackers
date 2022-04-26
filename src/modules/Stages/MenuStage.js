@@ -20,7 +20,7 @@ export default class MenuStage extends Stage {
 
     attachEvents() {
         console.log("attach");
-        this.startButton.on('mouseup', (e) => {
+        this.startButton.on('pointerdown', (e) => {
             this.game.changeStage(this.game.STAGES.PLAY);
         });
         this.startButton.on('mouseover', (e) => {

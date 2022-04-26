@@ -97,13 +97,16 @@ export default class PlayStage extends Stage {
      * Метод направляет орудие на переданные координаты
      */
     rotateGun(x, y) {
+        x = x / this.game.app.stage.scale.x;
+        y = y / this.game.app.stage.scale.y;
         this.airGun.rotateGun(x, y);
     }
 
     attachEvents() {
-        this.app.stage.on('mouseup', (e) => {
+        this.app.stage.on('pointerdown', (e) => {
             if (!this.isPaused && e.target !== this.pauseBtn) {
                 if (!this.isLosed) {
+                    this.rotateGun(e.data.global.x, e.data.global.y);
                     this.airGun.doShot();
                 } else {
                     this.game.changeStage(this.game.STAGES.MENU);
@@ -113,11 +116,7 @@ export default class PlayStage extends Stage {
 
         this.app.stage.on('mousemove', (e) => {
             if (!this.isPaused && !this.isLosed) {
-
-                //Учитываем размеры внешнего контейнера, который зависит от игровой зоны пользователя
-                const x = e.data.global.x / this.game.app.stage.scale.x;
-                const y = e.data.global.y / this.game.app.stage.scale.y;
-                this.rotateGun(x, y);
+                this.rotateGun(e.data.global.x, e.data.global.y);
             }
         });
 
@@ -127,7 +126,7 @@ export default class PlayStage extends Stage {
         this.pauseBtn.on('mouseout', (e) => {
             this.pauseBtn.texture = this.resources.BTN_PAUSE.texture;
         });
-        this.pauseBtn.on('mouseup', (e) => {
+        this.pauseBtn.on('pointerdown', (e) => {
             this.pauseGame();
         });
 

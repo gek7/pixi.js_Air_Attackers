@@ -51,14 +51,14 @@ export default class Game {
 
 
     resize() {
-        const renderWidth = window.innerWidth;
-        const renderHeight = window.innerHeight;
+        const renderWidth = document.documentElement.clientWidth;
+        const renderHeight = document.documentElement.clientWidth;
         const widthRatio = renderWidth / this.defaultRendererWidth;
         const heightRatio = renderHeight / this.defaultRendererHeight;
 
         //Берём минимальную сторону пользовательской игровой зоны, чтобы уместить туда игру
         const newScale = widthRatio > heightRatio ? heightRatio : widthRatio;
-
+        
         this.app.stage.scale.set(newScale);
 
         this.app.renderer.resize(this.defaultRendererWidth * newScale, this.defaultRendererHeight * newScale);
